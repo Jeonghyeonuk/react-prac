@@ -1,6 +1,11 @@
+import { auth } from "../firebase"
+
 function home() {
+  const logOut = () => {
+    auth.signOut();
+  }
   return (
-    <h1>home!</h1>
+    <h1><button onClick={logOut}>Log Out</button></h1>
   )
 }
 
