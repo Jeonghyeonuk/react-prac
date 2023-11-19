@@ -1,50 +1,10 @@
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
+import React, { useState } from 'react'
 import { auth } from '../firebase';
-import { useNavigate } from 'react-router-dom';
-
-const Wrapper = styled.div`
-height : 100%;
-display: flex;
-flex-direction: column;
-align-items: center;
-width: 420px;
-padding: 50px 0px;
-`;
-
-const Title = styled.h1`
-font-size : 42px
-`;
-
-
-const Form = styled.form`
-display: flex;
-flex-direction: column;
-margin-top: 50px;
-gap: 10px;
-width: 100%;
-`;
-
-const Input = styled.input`
-padding: 10px 20px;
-border-radius: 50px;
-border: none;
-width: 100%;
-font-size: 16px;
-&[type="submit"]{
-    cursor: pointer;
-    &:hover {
-        opacity: 0.8;
-    }
-}
-`;
-
-const Error = styled.span`
-font-weight: 600;
-color: tomato;
-`;
-
+import { Link, useNavigate } from 'react-router-dom';
+import { FirebaseError } from 'firebase/app';
+import { Error, Input, Form, Switcher, Title, Wrapper } from '../components/auth-components';
+import GithubButton from '../components/github-btn';
 
 
 export default function createAccount() {
@@ -69,6 +29,7 @@ export default function createAccount() {
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setError("")
         if (name === "" || password === "" || email === "" || isLoading) return;
         try {
             setIsLoading(true)
@@ -79,7 +40,10 @@ export default function createAccount() {
             })
             navigate("/");
         } catch (error) {
-
+            if (error instanceof FirebaseError) {
+                setError(error.message);
+                console.log (error.code, error.message)
+            }
         }
         finally {
             setIsLoading(false)
@@ -98,6 +62,10 @@ export default function createAccount() {
                 <Input type='submit' value={isLoading ? "Loading..." : "Create Account"} />
             </Form>
             {error !== "" ? <Error>{error}</Error> : null}
+            <Switcher>
+              Already have an account? <Link to="/login">Login &rarr;</Link>
+            </Switcher>
+            <GithubButton />
         </Wrapper>
     )
 }
