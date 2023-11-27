@@ -1,5 +1,7 @@
+import { addDoc, collection } from "firebase/firestore";
 import { useState } from "react";
 import styled from "styled-components"
+import { auth, database } from "../firebase";
 
 
 const Form = styled.form`
@@ -72,8 +74,27 @@ function PostTweetForm() {
         }
     }
 
+    const onSubmit = async (e:React.FocusEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (!user || isLoading || tweet === "" || tweet.length > 180) return;
+
+        try {
+            setIsLoading(true);
+            await addDoc(collection(database, "tweets"), {
+                tweet,
+                createdAt: Date.now(),
+                username : user.displayName ?? "Anonymous",
+                userId : user.uid,
+            })
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false)
+        }
+    }
     return (
-        <Form>
+        <Form onSubmit={onSubmit}>
             <TextArea rows={5}
                 maxLength={180} onChange={onChange} value={tweet} placeholder="What is happening ? " />
             <AttachFileButton htmlFor="file">{file ? "Photo added" : "Add photo"}</AttachFileButton>
